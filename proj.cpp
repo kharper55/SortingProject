@@ -17,11 +17,13 @@ NOTE: IN VSCODE, IF GDB IS THROWING ERROR 0xC0000139 DESPITE THE PROGRAM
 ============================================================================ */
 
 
-/* to do: ensure we get ints in range 1,4000000 inclusive
-          fix inconsistent header widths; make into a function
+/* to do: fix inconsistent header widths; make into a function
           separate functionality into multiple .cpp and .h files 
           expand sorting switch case to accept an argument for numerous consecutive sorts
-  */
+          swap to uint32_ts for all sorting?
+          handle x and 'X' for quitting
+          clean up UI by reprinting instructions
+*/
 
 /*
 https://www.programiz.com/dsa/bubble-sort
@@ -69,12 +71,12 @@ const char * FILE_NAMES[] = {
 };
 
 const char * ALGO_NAMES[] = {
-    "bubbleSort",
-    "selectionSort",
-    "insertionSort",
-    "mergeSort",
-    "quickSort",
-    "shellSort"
+    "Bubble Sort",
+    "Selection Sort",
+    "Insertion Sort",
+    "Merge Sort",
+    "Quick Sort",
+    "Shell Sort"
 };
 
 enum ALGOS {
@@ -104,7 +106,9 @@ void printIntArray(const char * arrLabel, int arr[], int arrLen, int maxColWidth
 // File I/O
 bool fileWriteRandInts(const char * fileName, ofstream &fileHandle, uint32_t numIterations);
 bool fileReadRandInts(const char * fileName, ifstream &fileHandle, int buff[], int buffLen);
+bool fileExists(const string& filename);
 
+// Console interaction
 void printConsoleMenu(char quitChar);
 char printConsoleSubMenu(char quitChar, char option);
 void printConfiguration(int setSize, const char * sortingAlgo);
@@ -160,7 +164,7 @@ int main() {
     //bool invalidOption = true;
     while(!userQuit) {
         bool invalidOption = true;
-        char fart;
+        //char overwrite = 'y';
         printConsoleMenu('x');
 
         cin >> option;
@@ -171,25 +175,42 @@ int main() {
                     while (invalidOption == true) {
                         choice = printConsoleSubMenu('x', option);
                         if (choice != QUIT_CHAR) {
-                            if ((static_cast<int>(choice) >= static_cast<int>('a')) && (static_cast<int>(choice) < static_cast<int>('a') + sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]))) {
-                                cout << "\nGenerating file for dataset of size " << FILE_SIZES[static_cast<int>(choice) - static_cast<int>('a')] << ".\n";
-                                cout << "\nThis will overwrite the existing file... Continue? (y/n): ";
+                            // + 1 handles option 'g' - generate all
+                            if ((static_cast<int>(choice) >= static_cast<int>('a')) && (static_cast<int>(choice) < static_cast<int>('a') + sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]) + 1)) {
                                 
-                                cin >> fart;
+                                int loopSize = 0;
 
-                                if (fart == 'y' || fart == 'Y') {
-                                    cout << "\nOverwriting file...\n";
-                                    if(!fileWriteRandInts(FILE_NAMES[static_cast<int>(choice) - static_cast<int>('a')], fileHandle, FILE_SIZES[static_cast<int>(choice) - static_cast<int>('a')])) {
-                                        cout << "\nFile write failed!\n";
-                                        //return -1;
+                                if (static_cast<int>(choice) == static_cast<int>('a') + sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0])) {
+                                    loopSize = sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]);
+                                }
+
+                                //for (int i = 0; i < loopSize; i++) {
+                                int i = 0;
+                                do {
+                                    char overwrite = 'y';
+                                    cout << "\nGenerating file '" << FILE_NAMES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i] << ".txt' for dataset of size " << FILE_SIZES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i] << ".\n";
+                                    
+                                    if (fileExists(FILE_NAMES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i])) {
+                                        cout << "\nFile exists. Operation will overwrite the file... Continue? (y/n): ";
+                                        cin >> overwrite;
                                     }
-                                    //else {}
-                                    invalidOption = false;
+
+                                    if (overwrite == 'y' || overwrite == 'Y') {
+                                        //cout << "\nGenerating file " << FILE_NAMES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i] << "...\n";
+                                        if(!fileWriteRandInts(FILE_NAMES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i], fileHandle, FILE_SIZES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i])) {
+                                            cout << "\nFile write failed!\n";
+                                            //return -1;
+                                        }
+                                        //else {}
+                                        cout << "\nDone.\n";
+                                        invalidOption = false;
+                                    }
+                                    else {
+                                        cout << "\nAborting...\n";
+                                    }
+                                    i++;
                                 }
-                                else {
-                                    cout << "\nAborting...\n";
-                                    //break;
-                                }
+                                while(i < loopSize);
                             }
                             else {
                                 cout << "\nUnrecognized option...\n";
@@ -255,41 +276,88 @@ int main() {
                 case('e'):
                 case('E'):
                 // needed to define scope explicitly with curly braces here
-                // current throwing exception on stoi in fileReadRandInts
-                {    //int * fileReadBuff2 = nullptr;
+                // this needs to be refactored to get the unsorted list every iteration
+                {
+
+                    char numIterations = 0;
+                    bool invalidEntry = true;
+                    
                     int * fileReadBuff2 = new int[FILE_SIZES[sortFileSize]];
 
-                    cout << "\nReading input file '" << FILE_NAMES[sortFileSize] << ".txt'.\n";
-                    
-                    fileReadRandInts(FILE_NAMES[sortFileSize], fileHandleRd, fileReadBuff2, FILE_SIZES[sortFileSize]);
-                    /*FILE_NAMES[static_cast<int>(choice) - static_cast<int>('a')], fileHandle, FILE_SIZES[static_cast<int>(choice) - static_cast<int>('a')])*/
-
-                    cout << "\nCommencing sort using " << ALGO_NAMES[algo] << ". This may take some time...\n";
-
-                    switch(algo) {
-                        case(BUBBLE):
-                            bubbleSort(fileReadBuff2, FILE_SIZES[sortFileSize]);
-                            break;
-                        case(SELECTION):
-                            selectionSort(fileReadBuff2, FILE_SIZES[sortFileSize]);
-                            break;
-                        case(INSERTION):
-                            insertionSort(fileReadBuff2, FILE_SIZES[sortFileSize]);
-                            break;
-                        case(MERGE):
-                            mergeSort(fileReadBuff2, 0, FILE_SIZES[sortFileSize] - 1);
-                            break;
-                        case(QUICK):
-                            quickSort(fileReadBuff2, 0, FILE_SIZES[sortFileSize] - 1);
-                            break;
-                        case(SHELL):
-                            shellSort(fileReadBuff2, FILE_SIZES[sortFileSize]);
-                            break;
-                        default:
-                            break;
+                    cout << "\nReading input file '" << FILE_NAMES[sortFileSize] << ".txt'...\n";
+                    if (!fileExists(FILE_NAMES[sortFileSize])) {
+                        cout << "\nFile '" << FILE_NAMES[sortFileSize] << ".txt' does not exist.\n";
+                        cout << "\nPlease generate the appropriate file via the main menu.\n";
                     }
+                    else if (fileReadRandInts(FILE_NAMES[sortFileSize], fileHandleRd, fileReadBuff2, FILE_SIZES[sortFileSize])) {
 
-                    printIntArray("sorted array", fileReadBuff2, FILE_SIZES[sortFileSize], 5);
+                        while (invalidEntry/*static_cast<int>(numIterations) < 1 && static_cast<int>(numIterations) > 5*/) {
+                            cout << "\nEnter the desired number of iterations as an integer in the range [1, 5] (use '" << QUIT_CHAR << "' to cancel): ";
+                            cin >> numIterations;
+                            if (!(static_cast<int>(numIterations) >= static_cast<int>('1') && static_cast<int>(numIterations) <= static_cast<int>('5'))) {
+                                if (numIterations == QUIT_CHAR) break;
+                                cout << "Invalid entry";
+                            }
+                            else invalidEntry = false;
+                        }
+
+                        if (!invalidEntry) {
+                            const char * f = (static_cast<int>(numIterations) > static_cast<int>('1')) ? "s " : " ";
+                            cout << "\nCommencing " << numIterations << " sort" << f << "using " << ALGO_NAMES[algo] << ". This may take some time...\n";
+                            
+                            for (int i = 1; i <= static_cast<int>(numIterations - 48); i++) {
+                                int * fileReadBuff2 = new int[FILE_SIZES[sortFileSize]];
+                                fileReadRandInts(FILE_NAMES[sortFileSize], fileHandleRd, fileReadBuff2, FILE_SIZES[sortFileSize]);
+                                cout << "\nIteration: " << i << "\n";
+
+                                // Decided to place time captures inside individual switch case blocks to avoid including asm jump overhead
+                                switch(algo) {
+                                    case(BUBBLE):
+                                        start = chrono::high_resolution_clock::now();
+                                        bubbleSort(fileReadBuff2, FILE_SIZES[sortFileSize]);
+                                        stop = chrono::high_resolution_clock::now();
+                                        break;
+                                    case(SELECTION):
+                                        start = chrono::high_resolution_clock::now();
+                                        selectionSort(fileReadBuff2, FILE_SIZES[sortFileSize]);
+                                        stop = chrono::high_resolution_clock::now();
+                                        break;
+                                    case(INSERTION):
+                                        start = chrono::high_resolution_clock::now();
+                                        insertionSort(fileReadBuff2, FILE_SIZES[sortFileSize]);
+                                        stop = chrono::high_resolution_clock::now();
+                                        break;
+                                    case(MERGE):
+                                        start = chrono::high_resolution_clock::now();
+                                        mergeSort(fileReadBuff2, 0, FILE_SIZES[sortFileSize] - 1);
+                                        stop = chrono::high_resolution_clock::now();
+                                        break;
+                                    case(QUICK):
+                                        start = chrono::high_resolution_clock::now();
+                                        quickSort(fileReadBuff2, 0, FILE_SIZES[sortFileSize] - 1);
+                                        stop = chrono::high_resolution_clock::now();
+                                        break;
+                                    case(SHELL):
+                                        start = chrono::high_resolution_clock::now();
+                                        shellSort(fileReadBuff2, FILE_SIZES[sortFileSize]);
+                                        stop = chrono::high_resolution_clock::now();
+                                        break;
+                                    default:
+                                        // This should never execute... Validation performed elsewhere
+                                        break;
+                                }
+
+                                duration = chrono::duration_cast<chrono::duration<double>>(stop - start);
+                                timeElapsed = duration.count();
+                                cout << "Sorting took " << fixed << setprecision(10) << timeElapsed << " seconds.\n";
+                                //printIntArray("sorted array", fileReadBuff2, FILE_SIZES[sortFileSize], 5);
+                                //numIterations--;
+                            }
+                        }
+                    }
+                    else {
+                        cout << "\nFile failed to open for reading...\n";
+                    }
 
                     delete[] fileReadBuff2; // Free allocated space.
 
@@ -310,6 +378,17 @@ int main() {
 }
 
 /* ============================================================================
+
+============================================================================ */
+bool fileExists(const string& filename) {
+    bool ret;
+    ifstream file(filename);
+    ret = file.good();
+    file.close();
+    return ret;
+}
+
+/* ============================================================================
 Function to populate a .txt file with random uint32_t's, newline delimited.
 ============================================================================ */
 bool fileWriteRandInts(const char *fileName, ofstream &fileHandle, uint32_t numIterations) {
@@ -322,6 +401,9 @@ bool fileWriteRandInts(const char *fileName, ofstream &fileHandle, uint32_t numI
 
     random_device rd;
     mt19937 gen(rd());
+
+    // Produces random integer values i, uniformly distributed on the closed interval [a,b] (inclusive of endpoints)
+    // https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
     uniform_int_distribution<uint32_t> dis(MIN_VALUE, MAX_VALUE);
 
     // Check if the generation of numIterations randNums is possible
@@ -745,26 +827,28 @@ void printConfiguration(int setSize, const char * sortingAlgo) {
 char printConsoleSubMenu(char quitChar, char option) {
 
     const int ITOA_BUFF_SIZE = 10;
-    
     char itoa_buff[ITOA_BUFF_SIZE];
-
     char choice;
+    const int numFiles = sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]);
+    const int numAlgos = sizeof(ALGO_NAMES)/sizeof(ALGO_NAMES[0]);
 
     cout << "\n";
     
     switch(option) {
 
         case('a'):
-            for(int i = 0; i < sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]); i++) {
-                snprintf(itoa_buff, ITOA_BUFF_SIZE, "%d", FILE_SIZES[i]);
-                cout << static_cast<char>(0x61 + i) << ") " << itoa_buff << "\n";
+            for(int i = 0; i < numFiles; i++) {
+                cout << static_cast<char>(0x61 + i) << ") " << FILE_SIZES[i] << "\n";
+                if (i == numFiles - 1) {
+                    cout << static_cast<char>(0x61 + i + 1) << ") All\n";
+                }
             }
 
             cout << "\nChoose a dataset size for file generation (use '" << quitChar << "' to cancel): ";
             break;
 
         case('b'):
-            for(int i = 0; i < sizeof(ALGO_NAMES)/sizeof(ALGO_NAMES[0]); i++) {
+            for(int i = 0; i < numAlgos; i++) {
                 cout << static_cast<char>(0x61 + i) << ") " << ALGO_NAMES[i] << "\n";
             }
 
@@ -772,9 +856,12 @@ char printConsoleSubMenu(char quitChar, char option) {
             break;
 
         case('c'):
-            for(int i = 0; i < sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]); i++) {
-                snprintf(itoa_buff, ITOA_BUFF_SIZE, "%d", FILE_SIZES[i]);
-                cout << static_cast<char>(0x61 + i) << ") " << itoa_buff << "\n";
+            for(int i = 0; i < numFiles; i++) {
+                cout << static_cast<char>(0x61 + i) << ") " << FILE_SIZES[i] << "\n";
+                /*
+                if (i == numFiles - 1) {
+                    cout << static_cast<char>(0x61 + i + 1) << ") All\n";
+                }*/
             }
 
             cout << "\nChoose a dataset size for sorting (use '" << quitChar << "' to cancel): ";
