@@ -80,6 +80,15 @@ const char * FILE_NAMES_SORTED[] = {
     "set550kSorted"
 };
 
+const char * FILE_NAMES_SORTED_REVERSE[] = {
+    "set50kSortedReverse",
+    "set100kSortedReverse",
+    "set175kSortedReverse",
+    "set300kSortedReverse",
+    "set425kSortedReverse",
+    "set550kSortedReverse"
+};
+
 const char * ALGO_NAMES[] = {
     "Bubble Sort",
     "Selection Sort",
@@ -122,7 +131,8 @@ bool fileWrite(const char *fileName, ofstream &fileHandle, int * arr, int arrLen
 // Console interaction
 void printConsoleMenu(char quitChar);
 char printConsoleSubMenu(char quitChar, char option);
-void printConfiguration(int setSize, const char * sortingAlgo, bool sorted);
+//void printConfiguration(int setSize, const char * sortingAlgo, bool sorted);
+void printConfiguration(int setSize, const char * sortingAlgo, bool sorted, bool reverseSorted);
 
 /* ============================================================================
 
@@ -172,6 +182,7 @@ int main() {
     int sortFileSize = SET_SIZE_DEFAULT;
     int algo = ALGO_DEFAULT;
     bool useSortedFile = false;
+    bool useDescendingOrderSortedFile = false;
     bool userQuit = false;
     //bool invalidOption = true;
     while(!userQuit) {
@@ -282,12 +293,20 @@ int main() {
                     cout << "\nUse sorted version of file? (y/n): ";  
                     cin >> userIn;
                     useSortedFile = (userIn == 'y' || userIn == 'Y') ? true : false;
+                    if (userIn == 'y' || userIn == 'Y') {
+                        cout << "\nUse reverse sorted version of file? (y/n): ";  
+                        cin >> userIn;
+                        useDescendingOrderSortedFile = (userIn == 'y' || userIn == 'Y') ? true : false;
+                    }
+                    else {
+                        useDescendingOrderSortedFile = false;
+                    }
                     break;
                     }
 
                 case('e'):
                 case('E'):
-                    printConfiguration(sortFileSize, ALGO_NAMES[algo], useSortedFile);
+                    printConfiguration(sortFileSize, ALGO_NAMES[algo], useSortedFile, useDescendingOrderSortedFile);
                     cout << "\nPress enter to continue: ";
                     
                     cin.get();
@@ -307,13 +326,14 @@ int main() {
                     int * fileReadBuff2 = new int[FILE_SIZES[sortFileSize]];
 
                     const char * fileName2 = (useSortedFile) ? FILE_NAMES_SORTED[sortFileSize] : FILE_NAMES[sortFileSize];
+                    const char * fileName3 = (useDescendingOrderSortedFile) ? FILE_NAMES_SORTED_REVERSE[sortFileSize] : fileName2;
 
-                    cout << "\nReading input file '" << fileName2 << ".txt'...\n";
-                    if (!fileExists(fileName2)) {
-                        cout << "\nFile '" << fileName2 << ".txt' does not exist.\n";
+                    cout << "\nReading input file '" << fileName3 << ".txt'...\n";
+                    if (!fileExists(fileName3)) {
+                        cout << "\nFile '" << fileName3 << ".txt' does not exist.\n";
                         cout << "\nPlease generate the appropriate file via the main menu.\n";
                     }
-                    else if (fileReadRandInts(fileName2, fileHandleRd, fileReadBuff2, FILE_SIZES[sortFileSize])) {
+                    else if (fileReadRandInts(fileName3, fileHandleRd, fileReadBuff2, FILE_SIZES[sortFileSize])) {
 
                         while (invalidEntry/*static_cast<int>(numIterations) < 1 && static_cast<int>(numIterations) > 5*/) {
                             cout << "\nEnter the desired number of iterations as an integer in the range [1, 5] (use '" << QUIT_CHAR << "' to cancel): ";
@@ -331,7 +351,7 @@ int main() {
                             
                             for (int i = 1; i <= static_cast<int>(numIterations - 48); i++) {
                                 int * fileReadBuff2 = new int[FILE_SIZES[sortFileSize]];
-                                fileReadRandInts(fileName2, fileHandleRd, fileReadBuff2, FILE_SIZES[sortFileSize]);
+                                fileReadRandInts(fileName3, fileHandleRd, fileReadBuff2, FILE_SIZES[sortFileSize]);
                                 cout << "\nIteration: " << i << "\n";
 
                                 // Decided to place time captures inside individual switch case blocks to avoid including asm jump overhead
@@ -379,10 +399,22 @@ int main() {
                                 //fileWrite(FILE_NAMES_SORTED[sortFileSize], fileHandle, fileReadBuff2, FILE_SIZES[sortFileSize]);
                                 if (!fileExists(FILE_NAMES_SORTED[sortFileSize])) {
                                     char yn = 'y';
-                                    cout << "Write sorted array to file? (y/n): ";
+                                    cout << "\nWrite sorted array to file? (y/n): ";
                                     cin >> yn;
-                                    if (yn == 'y') {
+                                    if (yn == 'y' || yn == 'Y') {
                                         fileWrite(FILE_NAMES_SORTED[sortFileSize], fileHandle, fileReadBuff2, FILE_SIZES[sortFileSize]);
+                                    }
+                                }
+                                if (!fileExists(FILE_NAMES_SORTED_REVERSE[sortFileSize])) {
+                                    char yn = 'y';
+                                    cout << "\nWrite reverse sorted array to file? (y/n): ";
+                                    cin >> yn;
+                                    if (yn == 'y' || yn == 'Y') {
+                                        //printIntArray("not reverse", fileReadBuff2, sortFileSize, 5);
+                                        reverseIntArray(fileReadBuff2, FILE_SIZES[sortFileSize]);
+                                        //printIntArray("reverse", fileReadBuff2, sortFileSize, 5);
+
+                                        fileWrite(FILE_NAMES_SORTED_REVERSE[sortFileSize], fileHandle, fileReadBuff2, FILE_SIZES[sortFileSize]);
                                     }
                                 }
                             }     
@@ -717,7 +749,6 @@ int partition(int arr[], int low, int high) {
     }
 
     // swap the pivot element with the greater element at i
-    //swap(&array[i + 1], &array[high]);
     temp = arr[i + 1];
     arr[i + 1] = arr[high];
     arr[high] = temp;
@@ -796,6 +827,7 @@ int findIndex(int arr[], int arrLen, const bool minMax) {
 This function reverses a sorted integer array.
 ============================================================================ */
 void reverseIntArray(int arr[], int arrLen) {
+    
     int temp, upperIdx, lowerIdx = 0;
     for (upperIdx = arrLen - 1; upperIdx >= arrLen / 2; upperIdx--) {
         temp = arr[upperIdx];
@@ -803,6 +835,21 @@ void reverseIntArray(int arr[], int arrLen) {
         arr[lowerIdx] = temp;
         lowerIdx++;
     }
+    /*
+    int temp;
+    int lowerIdx = 0;
+    int upperIdx = arrLen - 1;
+    
+    while (lowerIdx < upperIdx) {
+        // Swap elements
+        temp = arr[lowerIdx];
+        arr[lowerIdx] = arr[upperIdx];
+        arr[upperIdx] = temp;
+        
+        // Move indices towards the center
+        lowerIdx++;
+        upperIdx--;
+    }*/
 }
 
 /* ============================================================================
@@ -865,7 +912,7 @@ void printConsoleMenu(char quitChar) {
 /* ============================================================================
 
 ============================================================================ */
-void printConfiguration(int setSize, const char * sortingAlgo, bool sorted) {
+void printConfiguration(int setSize, const char * sortingAlgo, bool sorted, bool reverseSorted) {
     const int COL_WIDTH = 60;
     const char * TITLE = " Settings ";
 
@@ -882,7 +929,12 @@ void printConfiguration(int setSize, const char * sortingAlgo, bool sorted) {
     }
 
     const char * fileName = (sorted) ? FILE_NAMES_SORTED[setSize] : FILE_NAMES[setSize];
-    cout << "\n\nFile              : " << fileName << ".txt";
+    const char * fileName2 = (reverseSorted) ? FILE_NAMES_SORTED_REVERSE[setSize] : fileName;
+    /*
+    if (sorted && reverseSorted) {
+        const char * fileName = FILE_NAMES_SORTED_REVERSE[setSize];
+    }*/
+    cout << "\n\nFile              : " << fileName2 << ".txt";
     cout << "\nDataset size      : " << FILE_SIZES[setSize];
     cout << "\nSorting algorithm : " << sortingAlgo << "\n";
 }
