@@ -23,6 +23,7 @@ NOTE: IN VSCODE, IF GDB IS THROWING ERROR 0xC0000139 DESPITE THE PROGRAM
           swap to uint32_ts for all sorting?
           handle x and 'X' for quitting
           clean up UI by reprinting instructions
+            quickSort segfaults on sorted array
 */
 
 /*
@@ -70,6 +71,15 @@ const char * FILE_NAMES[] = {
     "set550k"
 };
 
+const char * FILE_NAMES_SORTED[] = {
+    "set50kSorted",
+    "set100kSorted",
+    "set175kSorted",
+    "set300kSorted",
+    "set425kSorted",
+    "set550kSorted"
+};
+
 const char * ALGO_NAMES[] = {
     "Bubble Sort",
     "Selection Sort",
@@ -107,11 +117,12 @@ void printIntArray(const char * arrLabel, int arr[], int arrLen, int maxColWidth
 bool fileWriteRandInts(const char * fileName, ofstream &fileHandle, uint32_t numIterations);
 bool fileReadRandInts(const char * fileName, ifstream &fileHandle, int buff[], int buffLen);
 bool fileExists(const string& filename);
+bool fileWrite(const char *fileName, ofstream &fileHandle, int * arr, int arrLen);
 
 // Console interaction
 void printConsoleMenu(char quitChar);
 char printConsoleSubMenu(char quitChar, char option);
-void printConfiguration(int setSize, const char * sortingAlgo);
+void printConfiguration(int setSize, const char * sortingAlgo, bool sorted);
 
 /* ============================================================================
 
@@ -160,6 +171,7 @@ int main() {
     char choice;
     int sortFileSize = SET_SIZE_DEFAULT;
     int algo = ALGO_DEFAULT;
+    bool useSortedFile = false;
     bool userQuit = false;
     //bool invalidOption = true;
     while(!userQuit) {
@@ -264,8 +276,18 @@ int main() {
                     break;
 
                 case('d'):
-                case('D'):
-                    printConfiguration(sortFileSize, ALGO_NAMES[algo]);
+                case('D'):  
+                    {
+                    char userIn = 'n';
+                    cout << "\nUse sorted version of file? (y/n): ";  
+                    cin >> userIn;
+                    useSortedFile = (userIn == 'y' || userIn == 'Y') ? true : false;
+                    break;
+                    }
+
+                case('e'):
+                case('E'):
+                    printConfiguration(sortFileSize, ALGO_NAMES[algo], useSortedFile);
                     cout << "\nPress enter to continue: ";
                     
                     cin.get();
@@ -273,8 +295,8 @@ int main() {
 
                     break;
 
-                case('e'):
-                case('E'):
+                case('f'):
+                case('F'):
                 // needed to define scope explicitly with curly braces here
                 // this needs to be refactored to get the unsorted list every iteration
                 {
@@ -284,12 +306,14 @@ int main() {
                     
                     int * fileReadBuff2 = new int[FILE_SIZES[sortFileSize]];
 
-                    cout << "\nReading input file '" << FILE_NAMES[sortFileSize] << ".txt'...\n";
-                    if (!fileExists(FILE_NAMES[sortFileSize])) {
-                        cout << "\nFile '" << FILE_NAMES[sortFileSize] << ".txt' does not exist.\n";
+                    const char * fileName2 = (useSortedFile) ? FILE_NAMES_SORTED[sortFileSize] : FILE_NAMES[sortFileSize];
+
+                    cout << "\nReading input file '" << fileName2 << ".txt'...\n";
+                    if (!fileExists(fileName2)) {
+                        cout << "\nFile '" << fileName2 << ".txt' does not exist.\n";
                         cout << "\nPlease generate the appropriate file via the main menu.\n";
                     }
-                    else if (fileReadRandInts(FILE_NAMES[sortFileSize], fileHandleRd, fileReadBuff2, FILE_SIZES[sortFileSize])) {
+                    else if (fileReadRandInts(fileName2, fileHandleRd, fileReadBuff2, FILE_SIZES[sortFileSize])) {
 
                         while (invalidEntry/*static_cast<int>(numIterations) < 1 && static_cast<int>(numIterations) > 5*/) {
                             cout << "\nEnter the desired number of iterations as an integer in the range [1, 5] (use '" << QUIT_CHAR << "' to cancel): ";
@@ -307,7 +331,7 @@ int main() {
                             
                             for (int i = 1; i <= static_cast<int>(numIterations - 48); i++) {
                                 int * fileReadBuff2 = new int[FILE_SIZES[sortFileSize]];
-                                fileReadRandInts(FILE_NAMES[sortFileSize], fileHandleRd, fileReadBuff2, FILE_SIZES[sortFileSize]);
+                                fileReadRandInts(fileName2, fileHandleRd, fileReadBuff2, FILE_SIZES[sortFileSize]);
                                 cout << "\nIteration: " << i << "\n";
 
                                 // Decided to place time captures inside individual switch case blocks to avoid including asm jump overhead
@@ -352,7 +376,16 @@ int main() {
                                 cout << "Sorting took " << fixed << setprecision(10) << timeElapsed << " seconds.\n";
                                 //printIntArray("sorted array", fileReadBuff2, FILE_SIZES[sortFileSize], 5);
                                 //numIterations--;
-                            }
+                                //fileWrite(FILE_NAMES_SORTED[sortFileSize], fileHandle, fileReadBuff2, FILE_SIZES[sortFileSize]);
+                                if (!fileExists(FILE_NAMES_SORTED[sortFileSize])) {
+                                    char yn = 'y';
+                                    cout << "Write sorted array to file? (y/n): ";
+                                    cin >> yn;
+                                    if (yn == 'y') {
+                                        fileWrite(FILE_NAMES_SORTED[sortFileSize], fileHandle, fileReadBuff2, FILE_SIZES[sortFileSize]);
+                                    }
+                                }
+                            }     
                         }
                     }
                     else {
@@ -484,6 +517,30 @@ bool fileReadRandInts(const char * fileName, ifstream &fileHandle, int buff[], i
 /* ============================================================================
 
 ============================================================================ */
+bool fileWrite(const char *fileName, ofstream &fileHandle, int * arr, int arrLen) {
+    bool ret = 1;
+    
+    fileHandle.open(fileName/*, ofstream::out*/);
+
+    if (fileHandle.is_open()) {
+        for (int i = 0; i < arrLen; i++) {
+            fileHandle << arr[i];
+            if (i != arrLen - 1) {
+                fileHandle << '\n';
+            }
+        }
+        fileHandle.close();
+    }
+    else {
+        cout << "File failed to open for writing.\n";
+        ret = 0;
+    }
+    return ret;
+}
+
+/* ============================================================================
+
+============================================================================ */
 void bubbleSort(int arr[], int arrLen) {
     const bool VERBOSE = false;
     int i, j, temp;
@@ -560,7 +617,10 @@ void merge(int arr[], int p, int q, int r) {
     int n1 = q - p + 1;
     int n2 = r - q;
 
-    int L[n1], M[n2];
+    //int L[n1], M[n2];
+    // Dynamic allocation to circumvent segfaults with recursive implementation
+    int *L = new int[n1];
+    int *M = new int[n2];
 
     for (int i = 0; i < n1; i++) {
         L[i] = arr[p + i];
@@ -603,6 +663,10 @@ void merge(int arr[], int p, int q, int r) {
         j++;
         k++;
     }
+
+    // Free dynamically allocated memory
+    delete[] L;
+    delete[] M;
 }
 
 // https://www.programiz.com/dsa/merge-sort
@@ -769,6 +833,7 @@ void printConsoleMenu(char quitChar) {
         "Generate file",
         "Select sorting algorithm",
         "Select file size",
+        "Select file type",
         "Show configuration",
         "Perform sort"
     };
@@ -800,7 +865,7 @@ void printConsoleMenu(char quitChar) {
 /* ============================================================================
 
 ============================================================================ */
-void printConfiguration(int setSize, const char * sortingAlgo) {
+void printConfiguration(int setSize, const char * sortingAlgo, bool sorted) {
     const int COL_WIDTH = 60;
     const char * TITLE = " Settings ";
 
@@ -816,7 +881,8 @@ void printConfiguration(int setSize, const char * sortingAlgo) {
         cout << "=";
     }
 
-    cout << "\n\nFile              : " << FILE_NAMES[setSize] << ".txt";
+    const char * fileName = (sorted) ? FILE_NAMES_SORTED[setSize] : FILE_NAMES[setSize];
+    cout << "\n\nFile              : " << fileName << ".txt";
     cout << "\nDataset size      : " << FILE_SIZES[setSize];
     cout << "\nSorting algorithm : " << sortingAlgo << "\n";
 }
@@ -857,7 +923,9 @@ char printConsoleSubMenu(char quitChar, char option) {
 
         case('c'):
             for(int i = 0; i < numFiles; i++) {
-                cout << static_cast<char>(0x61 + i) << ") " << FILE_SIZES[i] << "\n";
+                if (i < numFiles) {
+                    cout << static_cast<char>(0x61 + i) << ") " << FILE_SIZES[i] << "\n";
+                }
                 /*
                 if (i == numFiles - 1) {
                     cout << static_cast<char>(0x61 + i + 1) << ") All\n";
