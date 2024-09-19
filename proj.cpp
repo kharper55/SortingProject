@@ -720,12 +720,47 @@ void mergeSort(int arr[], int l, int r) {
 /* ============================================================================
 
 ============================================================================ */
+int medianOfThree(int arr[], int low, int high) {
+    int mid = low + (high - low) / 2;
+    
+    if (arr[low] > arr[mid]) {
+        // swap arr[low] and arr[mid]
+        int temp = arr[low];
+        arr[low] = arr[mid];
+        arr[mid] = temp;
+    }
+    if (arr[low] > arr[high]) {
+        // swap arr[low] and arr[high]
+        int temp = arr[low];
+        arr[low] = arr[high];
+        arr[high] = temp;
+    }
+    if (arr[mid] > arr[high]) {
+        // swap arr[mid] and arr[high]
+        int temp = arr[mid];
+        arr[mid] = arr[high];
+        arr[high] = temp;
+    }
+    
+    // Use the middle element as the pivot by swapping it to the end
+    int temp = arr[mid];
+    arr[mid] = arr[high];
+    arr[high] = temp;
+    
+    return arr[high];  // pivot is now at arr[high]
+}
+
+/* ============================================================================
+
+============================================================================ */
 // https://www.programiz.com/dsa/quick-sort
 // function to find the partition position
 int partition(int arr[], int low, int high) {
 
     // select the rightmost element as pivot
-    int pivot = arr[high];
+    //int pivot = arr[high];
+    int pivot = medianOfThree(arr, low, high); // segfault possibly from deep recursion 
+                                               // necessitated a better pivot selection
     int temp = 0;
 
     // pointer for greater element
