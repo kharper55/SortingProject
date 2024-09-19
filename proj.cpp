@@ -571,7 +571,12 @@ bool fileWrite(const char *fileName, ofstream &fileHandle, int * arr, int arrLen
 }
 
 /* ============================================================================
-
+bubbleSort(array)
+  for i <- 1 to sizeOfArray - 1
+    for j <- 1 to sizeOfArray - 1 - i
+      if leftElement > rightElement
+        swap leftElement and rightElement
+end bubbleSort
 ============================================================================ */
 void bubbleSort(int arr[], int arrLen) {
     const bool VERBOSE = false;
@@ -597,7 +602,15 @@ void bubbleSort(int arr[], int arrLen) {
 }
 
 /* ============================================================================
-
+selectionSort(array, size)
+  for i from 0 to size - 1 do
+    set i as the index of the current minimum
+    for j from i + 1 to size - 1 do
+      if array[j] < array[current minimum]
+        set j as the new current minimum index
+    if current minimum is not i
+      swap array[i] with array[current minimum]
+end selectionSort
 ============================================================================ */
 void selectionSort(int arr[], int arrLen) {
     int i, j, minIdx, temp;
