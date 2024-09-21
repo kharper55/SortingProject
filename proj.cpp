@@ -571,11 +571,11 @@ bool fileWrite(const char *fileName, ofstream &fileHandle, int * arr, int arrLen
 }
 
 /* ============================================================================
-bubbleSort(array)
-  for i <- 1 to sizeOfArray - 1
-    for j <- 1 to sizeOfArray - 1 - i
-      if leftElement > rightElement
-        swap leftElement and rightElement
+bubbleSort(array[0...n - 1])
+  for i <- 0 to n - 2
+    for j <- 0 to n - 2 - i
+        if leftElement > rightElement
+            swap leftElement and rightElement
 end bubbleSort
 ============================================================================ */
 void bubbleSort(int arr[], int arrLen) {
@@ -602,14 +602,14 @@ void bubbleSort(int arr[], int arrLen) {
 }
 
 /* ============================================================================
-selectionSort(array, size)
-  for i from 0 to size - 1 do
-    set i as the index of the current minimum
-    for j from i + 1 to size - 1 do
-      if array[j] < array[current minimum]
-        set j as the new current minimum index
-    if current minimum is not i
-      swap array[i] with array[current minimum]
+selectionSort(array[0...n - 1])
+  for i from 0 to n - 1 do
+    minIdx <- i
+    for j from i + 1 to n - 1 do
+        if array[j] < array[current minimum]
+            minIdx <- j
+    if minIdx != i
+        swap array[i] with array[minIdx]
 end selectionSort
 ============================================================================ */
 void selectionSort(int arr[], int arrLen) {
@@ -631,27 +631,23 @@ void selectionSort(int arr[], int arrLen) {
 }
 
 /* ============================================================================
-insertionSort(array)
-  mark first element as sorted
-  for each unsorted element X
-    'extract' the element X
-    for j <- lastSortedIndex down to 0
-      if current element j > X
-        move sorted element to the right by 1
-    break loop and insert X here
+insertionSort(array[0...n - 1])
+  for i from 1 to n - 1
+    key <- array[i]
+    j <- i - 1
+    while j >= 0 and array[j] > key
+        array[j + 1] <- array[j]
+        j <- j - 1
+    array[j + 1] <- key
 end insertionSort
 ============================================================================ */
 void insertionSort(int arr[], int arrLen) {
     int i, j, key;
     // Assume first index is sorted
     for (i = 1; i < arrLen; i++) {
-    // while (arr[i + 1] < arr[i]) {
         key = arr[i];
         j = i - 1;
         while (j >= 0 && arr[j] > key) {
-            // temp = arr[i + 1];
-            // arr[i + 1] = arr[i];
-            // arr[i] = temp;
             arr[j + 1] = arr[j];
             j -= 1;
         }
@@ -724,6 +720,16 @@ void merge(int arr[], int p, int q, int r) {
 
 // https://www.programiz.com/dsa/merge-sort
 // Divide the array into two subarrays, sort them and merge them
+/* ============================================================================
+mergeSort(array[0...n-1], leftIdx, rightIdx):
+    if leftIdx > rightIdx 
+        return
+    midIdx = (leftIdx + rightIdx)/2
+    mergeSort(array[0...n-1], leftIdx, midIdx)
+    mergeSort(array[0...n-1], midIdx + 1, rightIdx)
+    merge(array[0...n-1], leftIdx, midIdx, rightIdx)
+end mergeSort
+============================================================================ */
 void mergeSort(int arr[], int l, int r) {
     if (l < r) {
 
@@ -813,6 +819,27 @@ int partition(int arr[], int low, int high) {
     return (i + 1);
 }
 
+/* ============================================================================
+quickSort(array[0...n-1], leftIdx, rightIdx)
+    if (leftIdx < rightIdx)
+        pivotIdx <- partition(array, leftIdx, rightIdx)
+        quickSort(array, leftIdx, pivotIdx - 1)
+        quickSort(array, pivotIdx + 1, rightIdx)
+end quickSort
+============================================================================ */
+
+/* ============================================================================
+partition(array, leftmostIndex, rightmostIndex)
+        set rightmostIndex as pivotIndex
+        storeIndex <- leftmostIndex - 1
+        for i <- leftmostIndex + 1 to rightmostIndex
+        if element[i] < pivotElement
+            swap element[i] and element[storeIndex]
+            storeIndex++
+        swap pivotElement and element[storeIndex+1]
+    return storeIndex + 1
+end partition
+============================================================================ */
 // https://www.programiz.com/dsa/quick-sort
 void quickSort(int array[], int low, int high) {
     if (low < high) {
@@ -832,7 +859,11 @@ void quickSort(int array[], int low, int high) {
 
 
 /* ============================================================================
-
+shellSort(array[0...n-1]])
+    for interval i <- (n - 1)/2m down to 1
+        for each interval "i" in array
+            sort all the elements at interval "i"
+end shellSort
 ============================================================================ */
 void shellSort(int arr[], int arrLen) {
     // Rearrange elements at each arrLen/2, arrLen/4, arrLen/8, ... intervals
