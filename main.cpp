@@ -21,7 +21,6 @@ NOTE: IN VSCODE, IF GDB IS THROWING ERROR 0xC0000139 DESPITE THE PROGRAM
           comment code
           fix static casts 
           make variable names more reasonable
-          pack file types into appropriate folders
           clean up char declarations
 */
 

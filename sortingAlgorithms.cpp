@@ -90,6 +90,13 @@ void insertionSort(int arr[], int arrLen) {
 }
 
 /* ============================================================================
+Have we reached the end of any of the arrays?
+    No:
+        Compare current elements of both arrays 
+        Copy smaller element into sorted array
+        Move pointer of element containing smaller element
+    Yes:
+        Copy all remaining elements of non-empty array
 
 ============================================================================ */
 static void merge(int arr[], int p, int q, int r) {
@@ -208,7 +215,16 @@ static int medianOfThree(int arr[], int low, int high) {
 }
 
 /* ============================================================================
-
+partition(array[0...n-1], leftmostIdx, rightmostIdx)
+    set medianOfThreeIdx as pivotIdx
+    storeIndex <- leftmostIdx - 1
+    for i <- leftmostIdx + 1 to rightmostIdx
+        if element[i] < pivotElement
+            swap element[i] and element[storeIndex]
+            storeIndex++
+        swap array[pivotIdx] and element[storeIndex + 1]
+    return storeIndex + 1
+end partition
 ============================================================================ */
 static int partition(int arr[], int low, int high) {
 
@@ -253,19 +269,6 @@ quickSort(array[0...n-1], leftIdx, rightIdx)
         quickSort(array, leftIdx, pivotIdx - 1)
         quickSort(array, pivotIdx + 1, rightIdx)
 end quickSort
-============================================================================ */
-
-/* ============================================================================
-partition(array, leftmostIndex, rightmostIndex)
-        set rightmostIndex as pivotIndex
-        storeIndex <- leftmostIndex - 1
-        for i <- leftmostIndex + 1 to rightmostIndex
-        if element[i] < pivotElement
-            swap element[i] and element[storeIndex]
-            storeIndex++
-        swap pivotElement and element[storeIndex+1]
-    return storeIndex + 1
-end partition
 ============================================================================ */
 void quickSort(int array[], int low, int high) {
     if (low < high) {
