@@ -8,6 +8,10 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
+                "sortingAlgorithms.cpp",
+                "fileHandling.cpp",
+                "consoleInteraction.cpp",
+                "utility.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
