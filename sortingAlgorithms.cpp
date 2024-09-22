@@ -1,3 +1,12 @@
+/* ============================================================================
+sortingAlgorithms.cpp
+
+Desc:   Sorting Algorithms for Array Sorting Project 
+Course: Datastructures and Algorithms (CSCI2226)
+Author: Kevin Harper
+Date:   09/22/2024
+============================================================================ */
+
 #include "sortingAlgorithms.hpp"
 
 /* ============================================================================
@@ -17,11 +26,6 @@ void bubbleSort(int arr[], int arrLen) {
         for (j = 0; j < arrLen - i - 1; j++) {
             // Lower index value is greater than upper index value
             if (arr[j] > arr[j + 1]) {
-                if (VERBOSE) {
-                    cout << "Array index " << j << " value (" << 
-                        arr[j] << ")" << " is greater than value at index " <<
-                        j + 1 << " (" << arr[j + 1] << ")." << "\n";
-                }
                 // Perform the swap
                 temp = arr[j + 1];
                 arr[j + 1] = arr[j];
@@ -88,9 +92,7 @@ void insertionSort(int arr[], int arrLen) {
 /* ============================================================================
 
 ============================================================================ */
-// https://www.programiz.com/dsa/merge-sort
-// Merge two subarrays L and M into arr
-void merge(int arr[], int p, int q, int r) {
+static void merge(int arr[], int p, int q, int r) {
 
     // Create L ← A[p..q] and M ← A[q+1..r]
     int n1 = q - p + 1;
@@ -148,8 +150,6 @@ void merge(int arr[], int p, int q, int r) {
     delete[] M;
 }
 
-// https://www.programiz.com/dsa/merge-sort
-// Divide the array into two subarrays, sort them and merge them
 /* ============================================================================
 mergeSort(array[0...n-1], leftIdx, rightIdx):
     if leftIdx > rightIdx 
@@ -177,7 +177,7 @@ void mergeSort(int arr[], int l, int r) {
 /* ============================================================================
 
 ============================================================================ */
-int medianOfThree(int arr[], int low, int high) {
+static int medianOfThree(int arr[], int low, int high) {
     int mid = low + (high - low) / 2;
     
     if (arr[low] > arr[mid]) {
@@ -210,14 +210,11 @@ int medianOfThree(int arr[], int low, int high) {
 /* ============================================================================
 
 ============================================================================ */
-// https://www.programiz.com/dsa/quick-sort
-// function to find the partition position
-int partition(int arr[], int low, int high) {
+static int partition(int arr[], int low, int high) {
 
     // select the rightmost element as pivot
-    //int pivot = arr[high];
-    int pivot = medianOfThree(arr, low, high); // segfault possibly from deep recursion 
-                                               // necessitated a better pivot selection
+    // int pivot = arr[high]; // old pivot selection caused segfaults
+    int pivot = medianOfThree(arr, low, high); // better pivot selection
     int temp = 0;
 
     // pointer for greater element
@@ -270,7 +267,6 @@ partition(array, leftmostIndex, rightmostIndex)
     return storeIndex + 1
 end partition
 ============================================================================ */
-// https://www.programiz.com/dsa/quick-sort
 void quickSort(int array[], int low, int high) {
     if (low < high) {
 
@@ -296,8 +292,7 @@ end shellSort
 ============================================================================ */
 void shellSort(int arr[], int arrLen) {
     // Rearrange elements at each arrLen/2, arrLen/4, arrLen/8, ... intervals
-    // ie Shell's original sequence. see below link for other possible sequences
-    // https://www.programiz.com/dsa/shell-sort
+    // ie Shell's original sequence.
     for (int interval = arrLen / 2; interval > 0; interval /= 2) {
         for (int i = interval; i < arrLen; i += 1) {
             int temp = arr[i];
@@ -309,3 +304,7 @@ void shellSort(int arr[], int arrLen) {
         }
     }
 }
+
+/* ============================================================================
+                                  END FILE
+============================================================================ */

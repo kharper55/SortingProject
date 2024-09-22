@@ -1,3 +1,12 @@
+/* ============================================================================
+utility.cpp
+
+Desc:   Miscellaneous Functions for Array Sorting Project 
+Course: Datastructures and Algorithms (CSCI2226)
+Author: Kevin Harper
+Date:   09/22/2024
+============================================================================ */
+
 #include "utility.hpp"
 
 /* ============================================================================
@@ -60,3 +69,7 @@ void printIntArray(const char * arrLabel, int arr[], int arrLen, int maxColWidth
         }
     }
 }
+
+/* ============================================================================
+                                  END FILE
+============================================================================ */

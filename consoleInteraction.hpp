@@ -1,3 +1,12 @@
+/* ============================================================================
+consoleInteraction.hpp
+
+Desc:   Console Operations for Array Sorting Project 
+Course: Datastructures and Algorithms (CSCI2226)
+Author: Kevin Harper
+Date:   09/22/2024
+============================================================================ */
+
 #ifndef CONSOLE_INTERACTION_HPP
 #define CONSOLE_INTERACTION_HPP
 
@@ -19,3 +28,7 @@ char printConsoleSubMenu(char quitChar, char option);
 void printConfiguration(int setSize, const char * sortingAlgo, bool sorted, bool reverseSorted);
 
 #endif // CONSOLE_INTERACTION_HPP
+
+/* ============================================================================
+                                  END FILE
+============================================================================ */

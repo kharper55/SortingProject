@@ -1,13 +1,48 @@
+/* ============================================================================
+fileHandling.cpp
+
+Desc:   File Operations for Array Sorting Project 
+Course: Datastructures and Algorithms (CSCI2226)
+Author: Kevin Harper
+Date:   09/22/2024
+============================================================================ */
+
 #include "fileHandling.hpp"
+
+const char * datasetFolderPath = "Datasets";
 
 /* ============================================================================
 
 ============================================================================ */
-bool fileExists(const string& filename) {
+bool createDir(const char * dirName) {
+    filesystem::path folderPath = dirName;
+
+    // Create the folder if it doesn't exist
+    if (!filesystem::exists(folderPath)) {
+        if (filesystem::create_directory(folderPath)) {
+            cout << "\nCreated folder: " << folderPath << ".\n";
+            return true; // Folder created successfully
+        } else {
+            cerr << "\nFailed to create folder: " << folderPath << ".\n";
+            return false; // Folder creation failed
+        }
+    } 
+    else {
+        return true; // Folder already exists
+    }
+}
+
+/* ============================================================================
+
+============================================================================ */
+bool fileExists(const char * fileName) {
     bool ret;
-    ifstream file(filename);
+    filesystem::path filePath = datasetFolderPath / static_cast<filesystem::path>(fileName);
+    ifstream file(filePath);
+
     ret = file.good();
     file.close();
+    
     return ret;
 }
 
@@ -29,10 +64,13 @@ bool fileWriteRandInts(const char *fileName, ofstream &fileHandle, uint32_t numI
     // https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
     uniform_int_distribution<uint32_t> dis(MIN_VALUE, MAX_VALUE);
 
+    createDir(datasetFolderPath);
+    filesystem::path filePath = datasetFolderPath / static_cast<filesystem::path>(fileName);
+
     // Check if the generation of numIterations randNums is possible
     if (((MAX_VALUE - MIN_VALUE) >= numIterations - 1) && (MAX_VALUE > MIN_VALUE)) {
         // Open the specified file for writing (overwrite mode)
-        fileHandle.open(fileName/*, ofstream::out*/);
+        fileHandle.open(filePath);
 
         if (fileHandle.is_open()) {
             // Generate and write numIterations distinct random numbers
@@ -49,7 +87,6 @@ bool fileWriteRandInts(const char *fileName, ofstream &fileHandle, uint32_t numI
                         fileHandle << '\n';
                     }
 
-                    //fileHandle << randNum << '\n';
                     if (VERBOSE) {
                         cout << "Wrote distinct random integer " << uniqueNumbers.size() 
                             << " with value " << randNum << "\n";
@@ -86,13 +123,12 @@ bool fileReadRandInts(const char * fileName, ifstream &fileHandle, int buff[], i
     bool ret = false;
     uint32_t i = 0;
     string lineBuff;
+    filesystem::path filePath = datasetFolderPath / static_cast<filesystem::path>(fileName);
 
-    fileHandle.open(fileName/*, ifstream::in*/);
+    fileHandle.open(filePath);
     if (fileHandle.is_open()) {
         while(i < buffLen) {
-            //cout << "Reading line " << i + 1;
             getline(fileHandle, lineBuff);
-            //cout << ". Value is " << stoi(lineBuff) << ".\n";
             buff[i++] = stoi(lineBuff);
         }
         fileHandle.close();
@@ -109,8 +145,9 @@ bool fileReadRandInts(const char * fileName, ifstream &fileHandle, int buff[], i
 ============================================================================ */
 bool fileWrite(const char *fileName, ofstream &fileHandle, int * arr, int arrLen) {
     bool ret = 1;
-    
-    fileHandle.open(fileName/*, ofstream::out*/);
+    filesystem::path filePath = datasetFolderPath / static_cast<filesystem::path>(fileName);
+
+    fileHandle.open(filePath);
 
     if (fileHandle.is_open()) {
         for (int i = 0; i < arrLen; i++) {
@@ -127,3 +164,7 @@ bool fileWrite(const char *fileName, ofstream &fileHandle, int * arr, int arrLen
     }
     return ret;
 }
+
+/* ============================================================================
+                                  END FILE
+============================================================================ */

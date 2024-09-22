@@ -19,13 +19,10 @@ NOTE: IN VSCODE, IF GDB IS THROWING ERROR 0xC0000139 DESPITE THE PROGRAM
 /* to do: swap to uint32_ts for all sorting?
           make parameters for sorting into a class
           comment code
-
-https://www.programiz.com/dsa/bubble-sort
-https://www.programiz.com/dsa/selection-sort
-https://www.programiz.com/dsa/insertion-sort
-https://www.programiz.com/dsa/merge-sort
-https://www.programiz.com/dsa/quick-sort
-https://www.programiz.com/dsa/shell-sort
+          fix static casts 
+          make variable names more reasonable
+          pack file types into appropriate folders
+          clean up char declarations
 */
 
 // Library includes
@@ -47,11 +44,11 @@ https://www.programiz.com/dsa/shell-sort
 #define SET_SIZE_DEFAULT 0 // First option in FILE_SIZES list
 #define ALGO_DEFAULT 0     // First option in ALGO_NAMES list
 
-extern const int FILE_SIZES[6];
-extern const char * FILE_NAMES[6];
-extern const char * FILE_NAMES_SORTED[6];
-extern const char * FILE_NAMES_SORTED_REVERSE[6];
-extern const char * ALGO_NAMES[6];
+extern const int FILE_SIZES[];
+extern const char * FILE_NAMES[];
+extern const char * FILE_NAMES_SORTED[];
+extern const char * FILE_NAMES_SORTED_REVERSE[];
+extern const char * ALGO_NAMES[];
 
 enum ALGOS {    /* enum value corresponds to array index in ALGO_NAMES */
     BUBBLE,
@@ -123,7 +120,6 @@ int main() {
                                     if (overwrite == 'y' || overwrite == 'Y') {
                                         if(!fileWriteRandInts(FILE_NAMES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i], fileHandleWr, FILE_SIZES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i])) {
                                             cout << "\nFile write failed!\n";
-                                            
                                         }
                                         cout << "\nDone.\n";
                                         invalidOption = false;
@@ -304,8 +300,6 @@ int main() {
                                 timeElapsed = duration.count();
                                 cout << "Sorting took " << fixed << setprecision(10) << timeElapsed << " seconds.\n";
                                 
-                                //printIntArray(ALGO_NAMES[algo], fileReadBuff, FILE_SIZES[sortFileSize], 5);
-
                                 /* Optionally write sorted array to a new file if file DNE */
                                 if (!fileExists(FILE_NAMES_SORTED[sortFileSize])) {
                                     char yn = 'y';
@@ -336,7 +330,6 @@ int main() {
 
                                     if (verify == 'y' || verify == 'Y') {
                                         printIntArray(ALGO_NAMES[algo], fileReadBuff, FILE_SIZES[sortFileSize], 5);
-                                        cout << "\n";
                                     }  
                                 }
                             }

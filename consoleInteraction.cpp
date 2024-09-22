@@ -1,3 +1,12 @@
+/* ============================================================================
+consoleInteraction.cpp
+
+Desc:   Console Operations for Array Sorting Project 
+Course: Datastructures and Algorithms (CSCI2226)
+Author: Kevin Harper
+Date:   09/22/2024
+============================================================================ */
+
 #include "consoleInteraction.hpp"
 
 const int FILE_SIZES[] = {
@@ -50,7 +59,7 @@ const char * ALGO_NAMES[] = {
 ============================================================================ */
 void printCenteredTitle(const char * title, int col_width) {
     const int size = strlen(title);
-    //int padding = (col_width - size) / 2;
+
     // Calculate padding on both sides
     int total_padding = col_width - size;
     int left_padding = total_padding / 2;
@@ -170,3 +179,7 @@ char printConsoleSubMenu(char quitChar, char option) {
 
     return choice;
 }
+
+/* ============================================================================
+                                  END FILE
+============================================================================ */
