@@ -16,10 +16,8 @@ NOTE: IN VSCODE, IF GDB IS THROWING ERROR 0xC0000139 DESPITE THE PROGRAM
 
 ============================================================================ */
 
-/* to do: swap to uint32_ts for all sorting?
-          make parameters for sorting into a class
-          comment code
-          fix static casts 
+/* to do: make parameters for sorting into a class (? prob not worth it)
+          comments and cleanup
           make variable names more reasonable
           clean up char declarations
 */
@@ -39,24 +37,16 @@ NOTE: IN VSCODE, IF GDB IS THROWING ERROR 0xC0000139 DESPITE THE PROGRAM
 #include "consoleInteraction.hpp"
 #include "utility.hpp"
 
-#define QUIT_CHAR 'x'
+#define QUIT_CHAR       'x'
 #define SET_SIZE_DEFAULT 0 // First option in FILE_SIZES list
-#define ALGO_DEFAULT 0     // First option in ALGO_NAMES list
+#define ALGO_DEFAULT     4 // Default to quicksort
 
-extern const int FILE_SIZES[];
+// Defined in consoleInteraction.cpp
+extern const uint32_t FILE_SIZES[];
 extern const char * FILE_NAMES[];
 extern const char * FILE_NAMES_SORTED[];
 extern const char * FILE_NAMES_SORTED_REVERSE[];
 extern const char * ALGO_NAMES[];
-
-enum ALGOS {    /* enum value corresponds to array index in ALGO_NAMES */
-    BUBBLE,
-    SELECTION,
-    INSERTION,
-    MERGE,
-    QUICK,
-    SHELL
-};
 
 using namespace std;
 
@@ -75,7 +65,7 @@ int main() {
 
     char option;
     char choice;
-    int sortFileSize = SET_SIZE_DEFAULT;
+    uint32_t sortFileSize = SET_SIZE_DEFAULT;
     int algo = ALGO_DEFAULT;
     bool useSortedFile = false;
     bool useDescendingOrderSortedFile = false;
@@ -98,26 +88,31 @@ int main() {
                         choice = printConsoleSubMenu(QUIT_CHAR, 'a');
                         if (choice != QUIT_CHAR && (choice != (QUIT_CHAR - 0x20))) {
                             // + 1 handles option 'g' - generate all
-                            if ((static_cast<int>(choice) >= static_cast<int>('a')) && (static_cast<int>(choice) < static_cast<int>('a') + sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]) + 1)) {
+                            if ((choice >= 'a') && (choice < 'a' + sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]) + 1)) {
                                 
-                                int loopSize = 0;
+                                int loopSize = 0; // Set loopSize according to how many different datasets we'd like 
+                                                  // to generate at once. Should be either 0 or 6, used in a do-while
+                                                  // loop to ensure at least one file generation
 
-                                if (static_cast<int>(choice) == static_cast<int>('a') + sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0])) {
+                                // User chose option 'g' - generate all datasets
+                                if (choice == 'a' + sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0])) {
                                     loopSize = sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]);
                                 }
 
                                 int i = 0;
                                 do {
                                     char overwrite = 'y';
-                                    cout << "\nGenerating file '" << FILE_NAMES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i] << ".txt' for dataset of size " << FILE_SIZES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i] << ".\n";
+                                    cout << "\nGenerating file '" << FILE_NAMES[choice - 'a' - loopSize + i] 
+                                         << "' for dataset of size " << FILE_SIZES[choice - 'a' - loopSize + i] 
+                                         << ".\n";
                                     
-                                    if (fileExists(FILE_NAMES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i])) {
+                                    if (fileExists(FILE_NAMES[choice - 'a' - loopSize + i])) {
                                         cout << "\nFile exists. Operation will overwrite the file... Continue? (y/n): ";
                                         cin >> overwrite;
                                     }
 
                                     if (overwrite == 'y' || overwrite == 'Y') {
-                                        if(!fileWriteRandInts(FILE_NAMES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i], fileHandleWr, FILE_SIZES[static_cast<int>(choice) - static_cast<int>('a') - loopSize + i])) {
+                                        if(!fileWriteRandInts(FILE_NAMES[choice - 'a' - loopSize + i], fileHandleWr, FILE_SIZES[choice - 'a' - loopSize + i])) {
                                             cout << "\nFile write failed!\n";
                                         }
                                         cout << "\nDone.\n";
@@ -134,6 +129,7 @@ int main() {
                                 cout << "\nUnrecognized option...\n";
                             }
                         }
+                        // Break from outer while loop in case 'a'
                         else {
                             invalidOption = false;
                         }
@@ -146,9 +142,10 @@ int main() {
                     while (invalidOption == true) {
                         choice = printConsoleSubMenu(QUIT_CHAR, 'b');
                         if (choice != QUIT_CHAR && (choice != (QUIT_CHAR - 0x20))) {
-                            if ((static_cast<int>(choice) >= static_cast<int>('a')) && (static_cast<int>(choice) < static_cast<int>('a') + sizeof(ALGO_NAMES)/sizeof(ALGO_NAMES[0]))) {
-                                cout << "\nSelecting " << ALGO_NAMES[static_cast<int>(choice) - static_cast<int>('a')] << " algorithm.\n";
-                                algo = static_cast<int>(choice) - static_cast<int>('a');
+                            if ((choice >= 'a') && (choice < 'a' + sizeof(ALGO_NAMES)/sizeof(ALGO_NAMES[0]))) {
+                                cout << "\nSelecting " << ALGO_NAMES[choice - 'a'] << " algorithm.\n";
+                                // Update the selected algorithm
+                                algo = choice - 'a';
                                 invalidOption = false;
                             }
                             else {
@@ -167,9 +164,10 @@ int main() {
                     while (invalidOption == true) {
                         choice = printConsoleSubMenu(QUIT_CHAR, 'c');
                         if (choice != QUIT_CHAR && (choice != (QUIT_CHAR - 0x20))) {
-                            if ((static_cast<int>(choice) >= static_cast<int>('a')) && (static_cast<int>(choice) < static_cast<int>('a') + sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]))) {
-                                cout << "\nSelecting datset of size " << FILE_SIZES[static_cast<int>(choice) - static_cast<int>('a')] << " for sorting.\n";
-                                sortFileSize = static_cast<int>(choice) - static_cast<int>('a');
+                            if ((choice >= 'a') && (choice < 'a' + sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]))) {
+                                cout << "\nSelecting datset of size " << FILE_SIZES[choice - 'a'] << " for sorting.\n";
+                                // Update file size (to be used as a pointer to FILE_SIZE[])
+                                sortFileSize = choice - 'a';
                                 invalidOption = false;
                             }
                             else {
@@ -186,22 +184,22 @@ int main() {
                 /* Existence check performed elsewhere */
                 case('d'):
                 case('D'):  
-                    {
-                    char userIn = 'n';
+                {
+                    char useSorted = 'n';
                     printCenteredTitle(" File Type Selection Menu ", 60);
                     cout << "Use sorted version of file? (y/n): ";  
-                    cin >> userIn;
-                    useSortedFile = (userIn == 'y' || userIn == 'Y') ? true : false;
-                    if (userIn == 'y' || userIn == 'Y') {
+                    cin >> useSorted;
+                    useSortedFile = (useSorted == 'y' || useSorted == 'Y') ? true : false;
+                    if (useSorted == 'y' || useSorted == 'Y') {
                         cout << "\nUse reverse sorted version of file? (y/n): ";  
-                        cin >> userIn;
-                        useDescendingOrderSortedFile = (userIn == 'y' || userIn == 'Y') ? true : false;
+                        cin >> useSorted;
+                        useDescendingOrderSortedFile = (useSorted == 'y' || useSorted == 'Y') ? true : false;
                     }
                     else {
                         useDescendingOrderSortedFile = false;
                     }
                     break;
-                    }
+                }
 
                 /* Option e - show configuration (i.e. the sort to be performed and on which file) */
                 case('e'):
@@ -210,7 +208,9 @@ int main() {
                     cout << "\nPress enter to continue: ";
                     
                     cin.get();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // discard bytes if user entered any
+
+                    // Discard bytes if user entered any
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
 
                     break;
 
@@ -220,24 +220,27 @@ int main() {
                 // needed to define scope explicitly with curly braces here
                 // refactored to refetch the unsorted list every iteration
                 {
-
                     char numIterations = 0;
                     bool invalidEntry = true;
                     
-                    int * fileReadBuff = new int[FILE_SIZES[sortFileSize]];
+                    //uint32_t * fileReadBuff = new uint32_t[FILE_SIZES[sortFileSize]];
+                    //uint32_t fileReadBuffDummy[FILE_SIZES[5]];
+                    uint32_t * fileReadBuffDummy = new uint32_t[FILE_SIZES[sortFileSize]];
 
                     const char * fileName = (useSortedFile) ? FILE_NAMES_SORTED[sortFileSize] : FILE_NAMES[sortFileSize];
                     const char * fileName2 = (useDescendingOrderSortedFile) ? FILE_NAMES_SORTED_REVERSE[sortFileSize] : fileName;
 
                     printCenteredTitle(" Sort Performance ", 60);
 
-                    cout << "Reading input file '" << fileName2 << ".txt'...\n";
+                    // Check whether the selected file actually exists
+                    cout << "Reading input file '" << fileName2 << "'...\n";
                     if (!fileExists(fileName2)) {
-                        cout << "\nFile '" << fileName2 << ".txt' does not exist.\n";
+                        cout << "\nFile '" << fileName2 << "' does not exist.\n";
                         cout << "\nPlease generate the appropriate file via the main menu.\n";
                     }
-                    else if (fileReadRandInts(fileName2, fileHandleRd, fileReadBuff, FILE_SIZES[sortFileSize])) {
-
+                    else if (fileRead(fileName2, fileHandleRd, fileReadBuffDummy, FILE_SIZES[sortFileSize])) {
+                    //else {
+                        // Get a number of iterations to perform from the user
                         while (invalidEntry) {
                             cout << "\nEnter the desired number of iterations as an integer in the\nrange [1, 5] (use '" << QUIT_CHAR << "' to cancel): ";
                             cin >> numIterations;
@@ -254,10 +257,11 @@ int main() {
                             cout << "using " << ALGO_NAMES[algo] << ". This may take a while...\n";
                             
                             for (int i = 1; i <= static_cast<int>(numIterations - 48); i++) {
-                                int * fileReadBuff = new int[FILE_SIZES[sortFileSize]];
-                                fileReadRandInts(fileName2, fileHandleRd, fileReadBuff, FILE_SIZES[sortFileSize]);
+                                uint32_t * fileReadBuff = new uint32_t[FILE_SIZES[sortFileSize]];
+                                fileRead(fileName2, fileHandleRd, fileReadBuff, FILE_SIZES[sortFileSize]);
                                 cout << "\nIteration: " << i << "\n";
 
+                                // Perform an iteration of the chosen sorting algorithm on the selected dataset
                                 // Decided to place time captures inside individual switch case blocks to avoid including asm jump overhead
                                 switch(algo) {
                                     case(BUBBLE):
@@ -295,6 +299,7 @@ int main() {
                                         break;
                                 }
 
+                                // Calculate and display time duration
                                 duration = chrono::duration_cast<chrono::duration<double>>(stop - start);
                                 timeElapsed = duration.count();
                                 cout << "Sorting took " << fixed << setprecision(10) << timeElapsed << " seconds.\n";
@@ -329,16 +334,30 @@ int main() {
 
                                     if (verify == 'y' || verify == 'Y') {
                                         printIntArray(ALGO_NAMES[algo], fileReadBuff, FILE_SIZES[sortFileSize], 5);
+                                        int minIdx = findMinMax(fileReadBuff, FILE_SIZES[sortFileSize], MIN);
+                                        int maxIdx = findMinMax(fileReadBuff, FILE_SIZES[sortFileSize], MAX);
+                                        cout << "\nMinimum value (" << fileReadBuff[minIdx] << ") found at array index " << minIdx << ".\n";
+                                        cout << "Maximum value (" << fileReadBuff[maxIdx] << ") found at array index " << maxIdx << ".\n";
+                                        if (minIdx == 0 && maxIdx == FILE_SIZES[sortFileSize] - 1) {
+                                            cout << "\nArray appears to be properly sorted.\n";
+                                        }
+                                        else {
+                                            cout << "\nMinimum and/or maximum value are out of place.\n";
+                                            cout << "Sorting appears to have failed.\n";
+                                        }
                                     }  
                                 }
+
+                                delete[] fileReadBuff; // Free allocated space for array buffer
+                                                       // in preparation for subsequent iterations.
                             }
                         }
                     }
                     else {
-                        cout << "\nFile failed to open for reading...\n";
+                        cout << "\nFile read failed...\n";
                     }
 
-                    delete[] fileReadBuff; // Free allocated space.
+                    delete[] fileReadBuffDummy; // Free allocated space for file integrity check.
 
                     break;
                 }

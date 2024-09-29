@@ -9,7 +9,8 @@ Date:   09/22/2024
 
 #include "consoleInteraction.hpp"
 
-const int FILE_SIZES[] = {
+/* Dataset sizes to be used for empirical analysis of the sorting algorithms */
+const uint32_t FILE_SIZES[] = {
     50000,
     100000,
     175000,
@@ -18,33 +19,40 @@ const int FILE_SIZES[] = {
     550000
 };
 
+/* Unsorted data file names to be used for empirical analysis of the sorting 
+   algorithms */
 const char * FILE_NAMES[] = {
-    "set50k",
-    "set100k",
-    "set175k",
-    "set300k",
-    "set425k",
-    "set550k"
+    "set50k.txt",
+    "set100k.txt",
+    "set175k.txt",
+    "set300k.txt",
+    "set425k.txt",
+    "set550k.txt"
 };
 
+/* Sorted data file names to be used for empirical analysis of the sorting 
+   algorithms */
 const char * FILE_NAMES_SORTED[] = {
-    "set50kSorted",
-    "set100kSorted",
-    "set175kSorted",
-    "set300kSorted",
-    "set425kSorted",
-    "set550kSorted"
+    "set50kSorted.txt",
+    "set100kSorted.txt",
+    "set175kSorted.txt",
+    "set300kSorted.txt",
+    "set425kSorted.txt",
+    "set550kSorted.txt"
 };
 
+/* Descending order sorted data file names to be used for empirical analysis 
+   of the sorting algorithms */
 const char * FILE_NAMES_SORTED_REVERSE[] = {
-    "set50kSortedReverse",
-    "set100kSortedReverse",
-    "set175kSortedReverse",
-    "set300kSortedReverse",
-    "set425kSortedReverse",
-    "set550kSortedReverse"
+    "set50kSortedReverse.txt",
+    "set100kSortedReverse.txt",
+    "set175kSortedReverse.txt",
+    "set300kSortedReverse.txt",
+    "set425kSortedReverse.txt",
+    "set550kSortedReverse.txt"
 };
 
+/* String representations of the algorithms for console printing */
 const char * ALGO_NAMES[] = {
     "Bubble Sort",
     "Selection Sort",
@@ -55,7 +63,8 @@ const char * ALGO_NAMES[] = {
 };
 
 /* ============================================================================
-
+Print an indicative title for a console menu to the console and center the title
+string.
 ============================================================================ */
 void printCenteredTitle(const char * title, int col_width) {
     const int size = strlen(title);
@@ -81,7 +90,7 @@ void printCenteredTitle(const char * title, int col_width) {
 }
 
 /* ============================================================================
-
+Print the main menu for this programs implementation to the console.
 ============================================================================ */
 void printConsoleMenu(char quitChar) {
     const int COL_WIDTH = 60;
@@ -107,9 +116,9 @@ void printConsoleMenu(char quitChar) {
 } 
 
 /* ============================================================================
-
+Print the current configuration for sorting operation to the console.
 ============================================================================ */
-void printConfiguration(int setSize, const char * sortingAlgo, bool sorted, bool reverseSorted) {
+void printConfiguration(uint32_t setSize, const char * sortingAlgo, bool sorted, bool reverseSorted) {
     const int COL_WIDTH = 60;
     const char * TITLE = " Settings ";
 
@@ -118,13 +127,14 @@ void printConfiguration(int setSize, const char * sortingAlgo, bool sorted, bool
     const char * fileName = (sorted) ? FILE_NAMES_SORTED[setSize] : FILE_NAMES[setSize];
     const char * fileName2 = (reverseSorted) ? FILE_NAMES_SORTED_REVERSE[setSize] : fileName;
 
-    cout << "File              : " << fileName2 << ".txt";
+    cout << "File              : " << fileName2;
     cout << "\nDataset size      : " << FILE_SIZES[setSize];
     cout << "\nSorting algorithm : " << sortingAlgo << "\n";
 }
 
 /* ============================================================================
-
+Print one of a few sub menus selected from the main menu for this programs
+implementation to the console menu.
 ============================================================================ */
 char printConsoleSubMenu(char quitChar, char option) {
 
@@ -134,8 +144,6 @@ char printConsoleSubMenu(char quitChar, char option) {
     char choice;
     const int numFiles = sizeof(FILE_SIZES)/sizeof(FILE_SIZES[0]);
     const int numAlgos = sizeof(ALGO_NAMES)/sizeof(ALGO_NAMES[0]);
-
-    //cout << "\n";
     
     switch(option) {
 

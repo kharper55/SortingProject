@@ -12,16 +12,19 @@ Date:   09/22/2024
 
 using namespace std;
 
+#include <cstdint> // For standard unsigned integer sizes
+
 // Sorting algorithm implementations
-void bubbleSort(int arr[], int arrLen);                 // https://www.programiz.com/dsa/bubble-sort
-void selectionSort(int arr[], int arrLen);              // https://www.programiz.com/dsa/selection-sort
-void insertionSort(int arr[], int arrLen);              // https://www.programiz.com/dsa/insertion-sort
-static void merge(int arr[], int p, int q, int r);
-void mergeSort(int arr[], int l, int r);                // https://www.programiz.com/dsa/merge-sort
-static int medianOfThree(int arr[], int low, int high); // partition pivot selection
-static int partition(int arr[], int low, int high);
-void quickSort(int array[], int low, int high);         // https://www.programiz.com/dsa/quick-sort
-void shellSort(int arr[], int arrLen);                  // https://www.programiz.com/dsa/shell-sort
+void bubbleSort(uint32_t arr[], uint32_t arrLen);                         // https://www.programiz.com/dsa/bubble-sort
+void bubbleSortOptimized(uint32_t arr[], uint32_t arrLen);
+void selectionSort(uint32_t arr[], uint32_t arrLen);                      // https://www.programiz.com/dsa/selection-sort
+void insertionSort(uint32_t arr[], uint32_t arrLen);                      // https://www.programiz.com/dsa/insertion-sort
+static void merge(uint32_t arr[], uint32_t p, uint32_t q, uint32_t r);
+void mergeSort(uint32_t arr[], uint32_t l, uint32_t r);                   // https://www.programiz.com/dsa/merge-sort
+static uint32_t medianOfThree(uint32_t arr[], int32_t low, int32_t high); // partition pivot selection
+static uint32_t partition(uint32_t arr[], int32_t low, int32_t high);
+void quickSort(uint32_t array[], int32_t low, int32_t high);              // https://www.programiz.com/dsa/quick-sort
+void shellSort(uint32_t arr[], uint32_t arrLen);                          // https://www.programiz.com/dsa/shell-sort
 
 #endif  // SORTING_ALGORITHMS_HPP
 

@@ -7,21 +7,34 @@ Author: Kevin Harper
 Date:   09/22/2024
 ============================================================================ */
 
+/* NOTE: 
+    All sorting algorithm implementations and pseudocode representations 
+    borrowed from www.programiz.com/dsa and adapted as necessary. */
+
 #include "sortingAlgorithms.hpp"
+//#include "utility.hpp"           // For swap()... Omitted due to possible overhead
 
 /* ============================================================================
-bubbleSort(array[0...n - 1])
-  for i <- 0 to n - 2
-    for j <- 0 to n - 2 - i
-        if leftElement > rightElement
-            swap leftElement and rightElement
-end bubbleSort
+algorithm bubbleSortOptimized(array[0...n-1])
+
+// Input: array[0...n-1] - an array of integers to be sorted, length n
+
+    for i from 0 to n - 2
+        swapped <- false
+        for j from 0 to n - 2 - i
+            if array[j] > array[j + 1]
+                swap(array[j], array[j + 1])
+        if swapped is still false, break from loop
+
+end bubbleSortOptimized
 ============================================================================ */
-void bubbleSort(int arr[], int arrLen) {
+void bubbleSortOptimized(uint32_t arr[], uint32_t arrLen) {
     const bool VERBOSE = false;
-    int i, j, temp;
+    uint32_t i, j, temp;
+
     // Outer loop
     for (i = 0; i < arrLen - 1; i++) {
+        bool swapped = false;
         // Inner loop
         for (j = 0; j < arrLen - i - 1; j++) {
             // Lower index value is greater than upper index value
@@ -30,24 +43,65 @@ void bubbleSort(int arr[], int arrLen) {
                 temp = arr[j + 1];
                 arr[j + 1] = arr[j];
                 arr[j] = temp;
+                swapped = true;
             }
         }
+        if (swapped == false) break;
     }
 }
 
 /* ============================================================================
-selectionSort(array[0...n - 1])
-  for i from 0 to n - 1 do
-    minIdx <- i
-    for j from i + 1 to n - 1 do
-        if array[j] < array[current minimum]
-            minIdx <- j
-    if minIdx != i
-        swap array[i] with array[minIdx]
+algorithm bubbleSort(array[0...n-1])
+
+// Input: array[0...n-1] - an array of integers to be sorted, length n
+
+    for i from 0 to n - 2
+        for j from 0 to n - 2 - i
+            if array[j] > array[j + 1]
+                swap(array[j], array[j + 1])
+
+end bubbleSort
+============================================================================ */
+void bubbleSort(uint32_t arr[], uint32_t arrLen) {
+    const bool VERBOSE = false;
+    uint32_t i, j, temp;
+
+    // Outer loop
+    for (i = 0; i < arrLen - 1; i++) {
+        bool swapped = false;
+        // Inner loop
+        for (j = 0; j < arrLen - i - 1; j++) {
+            // Lower index value is greater than upper index value
+            if (arr[j] > arr[j + 1]) {
+                // Perform the swap
+                //swap(arr[j + 1], arr[j]);
+                temp = arr[j + 1];
+                arr[j + 1] = arr[j];
+                arr[j] = temp;
+                swapped = true;
+            }
+        }
+        if (swapped == false) break;
+    }
+}
+
+/* ============================================================================
+algorithm selectionSort(array[0...n-1])
+
+// Input: array[0...n-1] - an array of integers to be sorted, length n
+
+    for i from 0 to n - 1 do
+        minIdx <- i
+        for j from i + 1 to n - 1 do
+            if array[j] < array[minIdx]
+                minIdx <- j
+        if minIdx != i
+            swap(array[i], array[minIdx])
+
 end selectionSort
 ============================================================================ */
-void selectionSort(int arr[], int arrLen) {
-    int i, j, minIdx, temp;
+void selectionSort(uint32_t arr[], uint32_t arrLen) {
+    uint32_t i, j, minIdx, temp;
     for (i = 0; i < arrLen - 1; i++) {   // Outer loop
         minIdx = i;                      // Preset the minimum location
         for (j = i + 1; j < arrLen; j++) {
@@ -65,50 +119,92 @@ void selectionSort(int arr[], int arrLen) {
 }
 
 /* ============================================================================
-insertionSort(array[0...n - 1])
-  for i from 1 to n - 1
-    key <- array[i]
-    j <- i - 1
-    while j >= 0 and array[j] > key
-        array[j + 1] <- array[j]
-        j <- j - 1
-    array[j + 1] <- key
+algorithm insertionSort(array[0...n-1])
+
+// Input: array[0...n-1] - an array of integers to be sorted, length n
+
+    for i from 1 to n - 1
+        key <- array[i]
+        j <- i - 1
+        while j >= 0 and array[j] > key
+            array[j + 1] <- array[j]
+            j <- j - 1
+        array[j + 1] <- key
+
 end insertionSort
 ============================================================================ */
-void insertionSort(int arr[], int arrLen) {
-    int i, j, key;
+void insertionSort(uint32_t arr[], uint32_t arrLen) {
+    uint32_t i, key;
+    int32_t j; // must be signed to allow termination of algorithm
+
     // Assume first index is sorted
     for (i = 1; i < arrLen; i++) {
         key = arr[i];
         j = i - 1;
+        // Search for an element that is less than the predeclared key value
         while (j >= 0 && arr[j] > key) {
-            arr[j + 1] = arr[j];
+            arr[j + 1] = arr[j]; // Push back element, making room for key value
             j -= 1;
         }
-        arr[j + 1] = key;
+        arr[j + 1] = key;   // Insert the key value at the found location
     }
 }
 
 /* ============================================================================
-Have we reached the end of any of the arrays?
-    No:
-        Compare current elements of both arrays 
-        Copy smaller element into sorted array
-        Move pointer of element containing smaller element
-    Yes:
-        Copy all remaining elements of non-empty array
+algorithm merge(array[0...n-1], p, q, r)
 
+// Inputs: array[0...n-1] - an array of integers to be sorted, length n
+//         p - starting index of the first subarray
+//         q - ending index of the first subarray
+//         r - ending index of the second subarray
+
+    // Determine the size of the two subarrays
+    n1 = q - p + 1
+    n2 = r - q
+
+    // Create temporary arrays L and M
+    create L[n1] containing elements array[p...n1 - 1]
+    create M[n2] containing elements array[q + 1...n2 - 1]
+
+    // Initialize pointers for L, M, and array[0...n - 1]
+    i <- 0     // Pointer for L
+    j <- 0     // Pointer for M
+    k <- p     // Pointer for array
+
+    // Merge the two subarrays back into array[0...n - 1]
+    while i < n1 and j < n2 do
+        if L[i] <= M[j] then
+            array[k] = L[i]
+            i = i + 1
+        else
+            array[k] = M[j]
+            j = j + 1
+        k = k + 1
+
+    // Copy remaining elements from L[] into array[], if any
+    while i < n1 do
+        arr[k] = L[i]
+        i = i + 1
+        k = k + 1
+
+    // Copy remaining elements from M[] into array[], if any
+    while j < n2 do
+        arr[k] = M[j]
+        j = j + 1
+        k = k + 1
+
+end merge
 ============================================================================ */
-static void merge(int arr[], int p, int q, int r) {
+static void merge(uint32_t arr[], uint32_t p, uint32_t q, uint32_t r) {
 
     // Create L ← A[p..q] and M ← A[q+1..r]
-    int n1 = q - p + 1;
-    int n2 = r - q;
+    uint32_t n1 = q - p + 1;
+    uint32_t n2 = r - q;
 
     //int L[n1], M[n2];
     // Dynamic allocation to circumvent segfaults with recursive implementation
-    int *L = new int[n1];
-    int *M = new int[n2];
+    uint32_t *L = new uint32_t[n1];
+    uint32_t *M = new uint32_t[n2];
 
     for (int i = 0; i < n1; i++) {
         L[i] = arr[p + i];
@@ -119,7 +215,7 @@ static void merge(int arr[], int p, int q, int r) {
     }
         
     // Maintain current index of sub-arrays and main array
-    int i, j, k;
+    uint32_t i, j, k;
     i = 0;
     j = 0;
     k = p;
@@ -158,22 +254,34 @@ static void merge(int arr[], int p, int q, int r) {
 }
 
 /* ============================================================================
-mergeSort(array[0...n-1], leftIdx, rightIdx):
-    if leftIdx > rightIdx 
+algorithm mergeSort(array[0...n-1], leftIdx, rightIdx)
+
+// Input: array[0...n-1] - an array of integers to be sorted, length n
+//        leftIdx - the index of the first element in the current subarray
+//        rightIdx - the index of the last element in the current subarray
+
+    // Base case
+    if leftIdx >= rightIdx 
         return
-    midIdx = (leftIdx + rightIdx)/2
-    mergeSort(array[0...n-1], leftIdx, midIdx)
-    mergeSort(array[0...n-1], midIdx + 1, rightIdx)
-    merge(array[0...n-1], leftIdx, midIdx, rightIdx)
+    
+    // Recursive case
+    midIdx = (leftIdx + (rightIdx - leftIdx)) / 2
+    mergeSort(array, leftIdx, midIdx)
+    mergeSort(array, midIdx + 1, rightIdx)
+    merge(array, leftIdx, midIdx, rightIdx)
+
 end mergeSort
 ============================================================================ */
-void mergeSort(int arr[], int l, int r) {
+void mergeSort(uint32_t arr[], uint32_t l, uint32_t r) {
     if (l < r) {
 
         // m is the point where the array is divided into two subarrays
-        int m = l + (r - l) / 2;
+        uint32_t m = l + (r - l) / 2;
 
+        // Recursive call on left half of subarray
         mergeSort(arr, l, m);
+
+        // Recursive call on right half of subarray
         mergeSort(arr, m + 1, r);
 
         // Merge the sorted subarrays
@@ -182,32 +290,54 @@ void mergeSort(int arr[], int l, int r) {
 }
 
 /* ============================================================================
+algorithm medianOfThree(array[0...n-1], leftIdx, rightIdx)
 
+// Inputs: array[0...n-1] - an array of integers to be sorted, length n
+//         leftIdx - the index of the first element in the current subarray
+//         rightIdx - the index of the last element in the current subarray
+
+    midIdx = leftIdx + (rightIdx - leftIdx) / 2
+    
+    // Ensure array[leftIdx] <= array[midIdx] <= array[rightIdx]
+    if array[leftIdx] > array[midIdx]:
+        swap(array[leftIdx], array[mid])
+    if array[leftIdx] > array[rightIdx]:
+        swap(array[leftIdx], array[rightIdx])
+    if array[midIdx] > array[rightIdx]:
+        swap(array[midIdx], array[rightIdx])
+    
+    // Move the median (arr[mid]) to the end for use as the pivot
+    swap(array[midIdx], array[rightIdx])
+    
+    // Return value of the pivot
+    return array[rightIdx]
+
+end medianOfThree
 ============================================================================ */
-static int medianOfThree(int arr[], int low, int high) {
-    int mid = low + (high - low) / 2;
+static uint32_t medianOfThree(uint32_t arr[], int32_t low, int32_t high) {
+    uint32_t mid = low + (high - low) / 2;
     
     if (arr[low] > arr[mid]) {
         // swap arr[low] and arr[mid]
-        int temp = arr[low];
+        uint32_t temp = arr[low];
         arr[low] = arr[mid];
         arr[mid] = temp;
     }
     if (arr[low] > arr[high]) {
         // swap arr[low] and arr[high]
-        int temp = arr[low];
+        uint32_t temp = arr[low];
         arr[low] = arr[high];
         arr[high] = temp;
     }
     if (arr[mid] > arr[high]) {
         // swap arr[mid] and arr[high]
-        int temp = arr[mid];
+        uint32_t temp = arr[mid];
         arr[mid] = arr[high];
         arr[high] = temp;
     }
     
     // Use the middle element as the pivot by swapping it to the end
-    int temp = arr[mid];
+    uint32_t temp = arr[mid];
     arr[mid] = arr[high];
     arr[high] = temp;
     
@@ -215,30 +345,36 @@ static int medianOfThree(int arr[], int low, int high) {
 }
 
 /* ============================================================================
-partition(array[0...n-1], leftmostIdx, rightmostIdx)
-    set medianOfThreeIdx as pivotIdx
-    storeIndex <- leftmostIdx - 1
-    for i <- leftmostIdx + 1 to rightmostIdx
-        if element[i] < pivotElement
-            swap element[i] and element[storeIndex]
-            storeIndex++
-        swap array[pivotIdx] and element[storeIndex + 1]
-    return storeIndex + 1
+algorithm partition(array[0...n-1], leftIdx, rightIdx)
+
+// Inputs: array[0...n-1] - an array of integers to be sorted, length n
+//         leftIdx - the index of the first element in the current subarray
+//         rightIdx - the index of the last element in the current subarray
+
+    pivotVal <- medianOfThree(array, leftIdx, rightIdx)
+    storeIdx <- leftIdx - 1
+    for i <- leftIdx + 1 to rightIdx
+        if array[i] <= pivotVal
+            storeIdx <- storeIdx + 1
+            swap(array[i], array[storeIdx])
+    swap(array[rightIdx], array[storeIdx + 1])
+    return storeIdx + 1
+
 end partition
 ============================================================================ */
-static int partition(int arr[], int low, int high) {
+static uint32_t partition(uint32_t arr[], int32_t low, int32_t high) {
 
     // select the rightmost element as pivot
     // int pivot = arr[high]; // old pivot selection caused segfaults
-    int pivot = medianOfThree(arr, low, high); // better pivot selection
-    int temp = 0;
+    uint32_t pivot = medianOfThree(arr, low, high); // better pivot selection
+    uint32_t temp = 0;
 
     // pointer for greater element
-    int i = (low - 1);
+    int32_t i = low - 1;
 
     // traverse each element of the array
     // compare them with the pivot
-    for (int j = low; j < high; j++) {
+    for (uint32_t j = low; j < high; j++) {
         if (arr[j] <= pivot) {
             
             // if element smaller than pivot is found
@@ -263,20 +399,30 @@ static int partition(int arr[], int low, int high) {
 }
 
 /* ============================================================================
-quickSort(array[0...n-1], leftIdx, rightIdx)
-    if (leftIdx < rightIdx)
-        pivotIdx <- partition(array, leftIdx, rightIdx)
-        quickSort(array, leftIdx, pivotIdx - 1)
-        quickSort(array, pivotIdx + 1, rightIdx)
+algorithm quickSort(array[0...n-1], leftIdx, rightIdx)
+
+// Inputs: array[0...n-1] - an array of integers to be sorted, length n
+//         leftIdx - the index of the first element in the current subarray
+//         rightIdx - the index of the last element in the current subarray
+
+    // Base case
+    if (leftIdx >= rightIdx)
+        return
+
+    // Recursive case
+    pivotIdx <- partition(array, leftIdx, rightIdx)
+    quickSort(array, leftIdx, pivotIdx - 1)
+    quickSort(array, pivotIdx + 1, rightIdx)
+
 end quickSort
 ============================================================================ */
-void quickSort(int array[], int low, int high) {
+void quickSort(uint32_t array[], int32_t low, int32_t high) {
     if (low < high) {
 
         // find the pivot element such that
         // elements smaller than pivot are on left of pivot
         // elements greater than pivot are on right of pivot
-        int pi = partition(array, low, high);
+        uint32_t pi = partition(array, low, high);
 
         // recursive call on the left of pivot
         quickSort(array, low, pi - 1);
@@ -287,17 +433,23 @@ void quickSort(int array[], int low, int high) {
 }
 
 /* ============================================================================
-shellSort(array[0...n-1]])
-    for interval i <- (n - 1)/2m down to 1
+algorithm shellSort(array[0...n-1])
+
+// Input: array[0...n-1] - an array of integers to be sorted, length n
+
+    m <- 1
+    for interval i <- floor(n / 2^m) down to 1
         for each interval "i" in array
             sort all the elements at interval "i"
+        m <- m + 1
+            
 end shellSort
 ============================================================================ */
-void shellSort(int arr[], int arrLen) {
+void shellSort(uint32_t arr[], uint32_t arrLen) {
     // Rearrange elements at each arrLen/2, arrLen/4, arrLen/8, ... intervals
     // ie Shell's original sequence.
-    for (int interval = arrLen / 2; interval > 0; interval /= 2) {
-        for (int i = interval; i < arrLen; i += 1) {
+    for (uint32_t interval = arrLen / 2; interval > 0; interval /= 2) {
+        for (uint32_t i = interval; i < arrLen; i += 1) {
             int temp = arr[i];
             int j;
             for (j = i; j >= interval && arr[j - interval] > temp; j -= interval) {
