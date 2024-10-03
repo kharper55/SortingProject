@@ -23,23 +23,24 @@ NOTE: IN VSCODE, IF GDB IS THROWING ERROR 0xC0000139 DESPITE THE PROGRAM
 */
 
 // Library includes
-#include <iostream> // For console interaction
-#include <fstream>  // For file IO
-#include <cstdint>  // For unambiguous standard integer sizes
-#include <iomanip>  // for setprecision()
-#include <chrono>   // for high_resolution_clock
-#include <string>   // For stoi
-#include <cstring>  // For strlen
+#include <iostream>                 // For console interaction
+#include <fstream>                  // For file IO
+#include <cstdint>                  // For unambiguous standard integer sizes
+#include <iomanip>                  // For setprecision()
+#include <chrono>                   // for high_resolution_clock
+#include <string>                   // For stoi
+#include <cstring>                  // For strlen
 
 // Header includes
-#include "sortingAlgorithms.hpp"
-#include "fileHandling.hpp"
-#include "consoleInteraction.hpp"
-#include "utility.hpp"
+#include "sortingAlgorithms.hpp"    // Collection of sorting algorithms
+#include "fileHandling.hpp"         // File I/O and dataset generation
+#include "consoleInteraction.hpp"   // Console I/O
+#include "utility.hpp"              // Helper functions
+#include "Params.hpp"               // Custom class for user settings
 
-#define QUIT_CHAR       'x'
-#define SET_SIZE_DEFAULT 0 // First option in FILE_SIZES list
-#define ALGO_DEFAULT     4 // Default to quicksort
+#define QUIT_CHAR       'x'         // Quit/cancel/back character
+#define SET_SIZE_DEFAULT 0          // First option in FILE_SIZES list
+#define ALGO_DEFAULT     4          // Default to quicksort
 
 // Defined in consoleInteraction.cpp
 extern const uint32_t FILE_SIZES[];
@@ -70,6 +71,8 @@ int main() {
     bool useSortedFile = false;
     bool useDescendingOrderSortedFile = false;
     bool userQuit = false;
+
+    Params userParams;
 
     while(!userQuit) {
 
