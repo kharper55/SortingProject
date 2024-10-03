@@ -438,7 +438,7 @@ algorithm shellSort(array[0...n-1])
 // Input: array[0...n-1] - an array of integers to be sorted, length n
 
     m <- 1
-    for interval i <- floor(n / 2^m) down to 1
+    for interval i <- floor(n / 2^m) 
         for each interval "i" in array
             sort all the elements at interval "i"
         m <- m + 1
