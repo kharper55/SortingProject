@@ -1,0 +1,7 @@
+Introduce self
+Explain project assignment
+Explain design choices
+Examine features in console
+Show sort of 50k items with Quick Sort 3x iterations
+Show verification of sort
+Show sort of 550k items reverse order with Quick sort 5x iterations

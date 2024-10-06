@@ -36,7 +36,7 @@ NOTE: IN VSCODE, IF GDB IS THROWING ERROR 0xC0000139 DESPITE THE PROGRAM
 #include "fileHandling.hpp"         // File I/O and dataset generation
 #include "consoleInteraction.hpp"   // Console I/O
 #include "utility.hpp"              // Helper functions
-#include "Params.hpp"               // Custom class for user settings
+//#include "Params.hpp"               // Custom class for user settings
 
 #define QUIT_CHAR       'x'         // Quit/cancel/back character
 #define SET_SIZE_DEFAULT 0          // First option in FILE_SIZES list
@@ -72,7 +72,7 @@ int main() {
     bool useDescendingOrderSortedFile = false;
     bool userQuit = false;
 
-    Params userParams;
+    //Params userParams;
 
     while(!userQuit) {
 
